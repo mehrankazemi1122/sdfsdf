@@ -1,0 +1,39 @@
+name: service_discovery
+
+on:
+  push:
+    branches:
+      - main
+      
+jobs:
+  install-tools:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v2
+
+
+    - name: Install Go
+      uses: actions/setup-go@v2
+      with:
+        go-version: 1.21
+
+
+    - name: Install dnsX
+      run: |
+        go install -v github.com/projectdiscovery/dnsx/cmd/dnsx@latest
+        
+    - name: Install HttpX
+      run: |
+        go install -v github.com/projectdiscovery/httpx/cmd/httpx@latest
+        
+
+    - name: Install sponge
+      run: |
+        sudo apt-get install moreutils
+ 
+    - name: executing DNS Brute
+      run: |
+        curl -s https://raw.githubusercontent.com/mehrankazemi1122/service_discov/main/verisign.com.subs | sort -u > all_subs.txt
+        cat all_subs.txt | while read line; do echo $line | httpx -silent -follow-host-redirects -title -status-code -cdn -tech-detect -H "User-Agent: Mozilla/5.0 (Macintosh; Intel Mac OS X 10.15; rv:108.0) Gecko/20100101 Firefox/108.0" -H "Referer: $line";done
